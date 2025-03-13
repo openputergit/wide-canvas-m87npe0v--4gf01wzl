@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commercial Cum Packing List Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .step-content {
+            display: none;
+        }
+        .step-content.active {
+            display: block;
+        }
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 10mm;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            .no-print {
+                display: none;
+            }
+            .page {
+                box-shadow: none;
+                margin: 0;
+                padding: 10mm;
+            }
+        }
+        /* Ensure input fields appear clear in the PDF */
+        input, select, textarea {
+            border: 1px solid #ddd;
+            padding: 8px;
+            border-radius: 4px;
+            width: 100%;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #000;
+        }
+        th, td {
+            padding: 5px;
+            text-align: left;
+        }
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .page {
+                width: 100%;
+                padding: 5mm;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-10">
+        <div class="no-print">
+            <h1 class="text-3xl font-bold text-center mb-6">Commercial Cum Packing List Generator</h1>
+            
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <div class="mb-4">
+                    <div class="flex items-center mb-6">
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="bg-blue-600 h-2.5 rounded-full" id="progress-bar" style="width: 20%"></div>
+                        </div>
+                        <span class="ml-4" id="step-indicator">Step 1/5</span>
+                    </div>
+                    
+                    <!-- Step 1: Basic Information -->
+                    <div class="step-content active" data-step="1">
+                        <h2 class="text-xl font-semibold mb-4">Step 1: Basic Information</h2>
+                        <div class="form-grid">
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">Invoice Number</label>
+                                <input type="text" id="invoiceNumber" class="w-full" readonly>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">Date</label>
+                                <input type="date" id="invoiceDate" class="w-full">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">Exporter</label>
+                                <textarea id="exporter" class="w-full" rows="3"></textarea>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">Buyer</label>
+                                <textarea id="buyer" class="w-full" rows="3"></textarea>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">Notify Party</label>
+                                <textarea id="notifyParty" class="w-full" rows="3"></textarea>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">Buyer's Reference</label>
+                                <input type="text" id="buyerReference" class="w-full">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 2: Shipping Details -->
+                    <div class="step-content" data-step="2">
+                        <h2 class="text-xl font-semibold mb-4">Step 2: Shipping Details</h2>
+                        <div class="form-grid">
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">Container Number</label>
+                                <input type="text" id="containerNumber" class="w-full">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">Line Seal No</label>
+                                <input type="text" id="lineSealNo" class="w-full">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">RFID Seal No</label>
+                                <input type="text" id="rfidSealNo" class="w-full">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">Pre Carrier By</label>
+                                <input type="text" id="preCarrierBy" class="w-full">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">Place of Receipt by Pre Carrier</label>
+                                <input type="text" id="placeOfReceipt" class="w-full">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">Carriage By</label>
+                                <input type="text" id="carriageBy" class="w-full">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">Port of Loading</label>
+                                <input type="text" id="portOfLoading" class="w-full">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">Port of Discharge</label>
+                                <input type="text" id="portOfDischarge" class="w-full">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">Final Destination</label>
+                                <input type="text" id="finalDestination" class="w-full">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">Country of Final Destination</label>
+                                <input type="text" id="countryOfFinalDestination" class="w-full">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3: Product Details -->
+                    <div class="step-content" data-step="3">
+                        <h2 class="text-xl font-semibold mb-4">Step 3: Product Details</h2>
+                        
+                        <div id="productEntries" class="mb-4">
+                            <div class="product-entry mb-4 p-4 border border-gray-300 rounded">
+                                <div class="mb-4">
+                                    <label class="block text-gray-700 mb-2">Description of Product</label>
+                                    <textarea class="product-description w-full" rows="2"></textarea>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div class="mb-4">
+                                        <label class="block text-gray-700 mb-2">Quantity (KGS)</label>
+                                        <input type="number" step="0.01" class="product-quantity w-full">
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="block text-gray-700 mb-2">Rate per KG in $</label>
+                                        <input type="number" step="0.01" class="product-rate w-full">
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="block text-gray-700 mb-2">Total Amount in $</label>
+                                        <input type="number" step="0.01" class="product-total w-full" readonly>
+                                    </div>
+                                </div>
+                                <button type="button" class="remove-product text-red-600 text-sm mt-2" style="display: none;">
+                                    <i class="bi bi-trash"></i> Remove
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <button type="button" id="addProductBtn" class="bg-blue-500 text-white py-2 px-4 rounded mb-4">
+                            <i class="bi bi-plus"></i> Add Another Product
+                        </button>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">Date of Rate Count for 1$</label>
+                                <input type="date" id="dateOfRateCount" class="w-full">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">Rate Count for 1$</label>
+                                <input type="number" step="0.01" id="rateCount" class="w-full">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2">Grand Total Amount in $</label>
+                            <input type="number" step="0.01" id="grandTotal" class="w-full" readonly>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2">Equivalent to INR</label>
+                            <input type="number" step="0.01" id="equivalentInr" class="w-full" readonly>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2">Total Amount in Words</label>
+                            <input type="text" id="amountInWords" class="w-full">
+                        </div>
+                    </div>
+                    
+                    <!-- Step 4: Packing Details -->
+                    <div class="step-content" data-step="4">
+                        <h2 class="text-xl font-semibold mb-4">Step 4: Packing Details</h2>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2">Marks & N.O.S</label>
+                            <input type="text" id="marksAndNos" class="w-full">
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">Length (MM)</label>
+                                <input type="number" id="length" class="w-full">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">Width (MM)</label>
+                                <input type="number" id="width" class="w-full">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">Height (MM)</label>
+                                <input type="number" id="height" class="w-full">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2">Total No. of Packages</label>
+                            <input type="number" id="totalPackages" class="w-full">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2">Notes</label>
+                            <textarea id="notes" class="w-full" rows="4"></textarea>
+                        </div>
+
+                        <h2 class="text-xl font-semibold mb-4 mt-6">Banking Details</h2>
+                        <div class="form-grid">
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">A/C Name</label>
+                                <input type="text" id="accountName" class="w-full" value="KOTAK BANK">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">A/C Number</label>
+                                <input type="text" id="accountNumber" class="w-full" value="8014747474">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">A/C Banking Address</label>
+                                <textarea id="bankingAddress" class="w-full" rows="3">CHITRA BRANCH, BHAVNAGAR, GUJARAT, INDIA 364004</textarea>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">IFSC Code</label>
+                                <input type="text" id="ifscCode" class="w-full" value="SCBL0036001">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2">SWIFT Code</label>
+                                <input type="text" id="swiftCode" class="w-full" value="KKBK0003062">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 5: Preview and Generate PDF -->
+                    <div class="step-content" data-step="5">
+                        <h2 class="text-xl font-semibold mb-4">Step 5: Preview and Generate PDF</h2>
+                        
+                        <div id="preview-container" class="overflow-x-auto">
+                            <div class="mb-6" id="pdf-content">
+                                <div class="page">
+                                    <div class="border border-gray-800 p-4">
+                                        <div class="text-center mb-4">
+                                            <h1 class="text-2xl font-bold">COMMERCIAL CUM PACKING LIST</h1>
+                                        </div>
+                                        
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                            <div>
+                                                <p><strong>Exporter:</strong> <span id="preview-exporter"></span></p>
+                                            </div>
+                                            <div>
+                                                <p><strong>Invoice No:</strong> <span id="preview-invoiceNumber"></span></p>
+                                                <p><strong>Date:</strong> <span id="preview-invoiceDate"></span></p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                            <div>
+                                                <p><strong>Buyer:</strong> <span id="preview-buyer"></span></p>
+                                            </div>
+                                            <div>
+                                                <p><strong>Buyer's Reference:</strong> <span id="preview-buyerReference"></span></p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-4">
+                                            <p><strong>Notify Party:</strong> <span id="preview-notifyParty"></span></p>
+                                        </div>
+                                        
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                            <div>
+                                                <p><strong>Container Number:</strong> <span id="preview-containerNumber"></span></p>
+                                                <p><strong>Line Seal No:</strong> <span id="preview-lineSealNo"></span></p>
+                                                <p><strong>RFID Seal No:</strong> <span id="preview-rfidSealNo"></span></p>
+                                            </div>
+                                            <div>
+                                                <p><strong>Pre Carrier By:</strong> <span id="preview-preCarrierBy"></span></p>
+                                                <p><strong>Place of Receipt:</strong> <span id="preview-placeOfReceipt"></span></p>
+                                                <p><strong>Carriage By:</strong> <span id="preview-carriageBy"></span></p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                            <div>
+                                                <p><strong>Port of Loading:</strong> <span id="preview-portOfLoading"></span></p>
+                                                <p><strong>Port of Discharge:</strong> <span id="preview-portOfDischarge"></span></p>
+                                            </div>
+                                            <div>
+                                                <p><strong>Final Destination:</strong> <span id="preview-finalDestination"></span></p>
+                                                <p><strong>Country of Final Destination:</strong> <span id="preview-countryOfFinalDestination"></span></p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-6 overflow-x-auto">
+                                            <table class="w-full border border-gray-800">
+                                                <thead>
+                                                    <tr class="bg-gray-100">
+                                                        <th>Description of Product</th>
+                                                        <th>Quantity (KGS)</th>
+                                                        <th>Rate per KG in $</th>
+                                                        <th>Total Amount in $</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="preview-products"></tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <td colspan="3" class="text-right"><strong>Grand Total:</strong></td>
+                                                        <td id="preview-grandTotal"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="4">
+                                                            <strong>Amount in Words:</strong> <span id="preview-amountInWords"></span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="4">
+                                                            <strong>Date of Rate Count for 1$:</strong> <span id="preview-dateOfRateCount"></span><br>
+                                                            <strong>Rate Count for 1$:</strong> <span id="preview-rateCount"></span><br>
+                                                            <strong>Equivalent to INR:</strong> <span id="preview-equivalentInr"></span>
+                                                        </td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                        
+                                        <div class="mb-6 overflow-x-auto">
+                                            <h3 class="font-bold text-lg mb-2">Packing Details</h3>
+                                            <table class="w-full border border-gray-800">
+                                                <tr>
+                                                    <th>Marks & N.O.S</th>
+                                                    <th>Length (MM)</th>
+                                                    <th>Width (MM)</th>
+                                                    <th>Height (MM)</th>
+                                                    <th>Total No. of Packages</th>
+                                                </tr>
+                                                <tr>
+                                                    <td id="preview-marksAndNos"></td>
+                                                    <td id="preview-length"></td>
+                                                    <td id="preview-width"></td>
+                                                    <td id="preview-height"></td>
+                                                    <td id="preview-totalPackages"></td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        
+                                        <div class="mb-6">
+                                            <h3 class="font-bold text-lg mb-2">Banking Details</h3>
+                                            <div id="preview-banking-details">
+                                                <p>Bank Name: <span id="preview-accountName"></span></p>
+                                                <p>Branch: <span id="preview-bankingAddress"></span></p>
+                                                <p>Account Number: <span id="preview-accountNumber"></span></p>
+                                                <p>SWIFT Code: <span id="preview-swiftCode"></span></p>
+                                                <p>IFSC Code: <span id="preview-ifscCode"></span></p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-6">
+                                            <h3 class="font-bold text-lg mb-2">Notes</h3>
+                                            <p id="preview-notes"></p>
+                                        </div>
+                                        
+                                        <div class="text-right mt-8">
+                                            <p class="mb-16">For XYZ COMPANY</p>
+                                            <p>Authorized Signatory</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-center mt-4">
+                            <button type="button" id="generatePdfBtn" class="bg-green-600 text-white py-2 px-6 rounded">
+                                <i class="bi bi-file-earmark-pdf"></i> Generate PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between mt-6">
+                    <button type="button" id="prevStepBtn" class="bg-gray-500 text-white py-2 px-6 rounded" style="display: none;">
+                        <i class="bi bi-arrow-left"></i> Previous
+                    </button>
+                    <button type="button" id="nextStepBtn" class="bg-blue-600 text-white py-2 px-6 rounded">
+                        Next <i class="bi bi-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize variables
+            let currentStep = 1;
+            const totalSteps = 5;
+            let lastInvoiceNumber = localStorage.getItem('lastInvoiceNumber') || 0;
+            
+            // Set today's date by default
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0];
+            document.getElementById('invoiceDate').value = formattedDate;
+            document.getElementById('dateOfRateCount').value = formattedDate;
+            
+            // Generate new invoice number
+            function generateInvoiceNumber() {
+                const newInvoiceNumber = parseInt(lastInvoiceNumber) + 1;
+                document.getElementById('invoiceNumber').value = `INV-${String(newInvoiceNumber).padStart(4, '0')}`;
+                return newInvoiceNumber;
+            }
+            
+            // Initialize invoice number
+            generateInvoiceNumber();
+            
+            // Add product entry functionality
+            document.getElementById('addProductBtn').addEventListener('click', function() {
+                const productEntries = document.getElementById('productEntries');
+                const firstEntry = productEntries.querySelector('.product-entry');
+                const newEntry = firstEntry.cloneNode(true);
+                
+                // Clear values in the cloned entry
+                newEntry.querySelectorAll('input, textarea').forEach(input => {
+                    input.value = '';
+                });
+                
+                // Show remove button for new entries
+                newEntry.querySelector('.remove-product').style.display = 'inline-block';
+                
+                // Add event listeners to the new entry
+                addProductEntryListeners(newEntry);
+                
+                productEntries.appendChild(newEntry);
+            });
+            
+            // Add event listeners to initial product entry
+            addProductEntryListeners(document.querySelector('.product-entry'));
+            
+            // Function to add event listeners to product entries
+            function addProductEntryListeners(entry) {
+                const quantityField = entry.querySelector('.product-quantity');
+                const rateField = entry.querySelector('.product-rate');
+                const totalField = entry.querySelector('.product-total');
+                const removeButton = entry.querySelector('.remove-product');
+                
+                quantityField.addEventListener('input', calculateProductTotal);
+                rateField.addEventListener('input', calculateProductTotal);
+                
+                function calculateProductTotal() {
+                    const quantity = parseFloat(quantityField.value) || 0;
+                    const rate = parseFloat(rateField.value) || 0;
+                    totalField.value = (quantity * rate).toFixed(2);
+                    
+                    updateGrandTotal();
+                }
+                
+                if (removeButton) {
+                    removeButton.addEventListener('click', function() {
+                        entry.remove();
+                        updateGrandTotal();
+                    });
+                }
+            }
+            
+            // Update grand total
+            function updateGrandTotal() {
+                const productTotals = document.querySelectorAll('.product-total');
+                let grandTotal = 0;
+                
+                productTotals.forEach(totalField => {
+                    grandTotal += parseFloat(totalField.value) || 0;
+                });
+                
+                document.getElementById('grandTotal').value = grandTotal.toFixed(2);
+                
+                // Update equivalent in INR if rate is available
+                const rateCount = parseFloat(document.getElementById('rateCount').value) || 0;
+                if (rateCount > 0) {
+                    document.getElementById('equivalentInr').value = (grandTotal * rateCount).toFixed(2);
+                }
+            }
+            
+            // Update INR value when rate changes
+            document.getElementById('rateCount').addEventListener('input', updateGrandTotal);
+            
+            // Navigation functions
+            document.getElementById('nextStepBtn').addEventListener('click', function() {
+                if (currentStep < totalSteps) {
+                    if (validateStep(currentStep)) {
+                        goToStep(currentStep + 1);
+                    }
+                }
+            });
+            
+            document.getElementById('prevStepBtn').addEventListener('click', function() {
+                if (currentStep > 1) {
+                    goToStep(currentStep - 1);
+                }
+            });
+            
+            function goToStep(step) {
+                // Hide current step
+                document.querySelector(`.step-content[data-step="${currentStep}"]`).classList.remove('active');
+                
+                // Show new step
+                document.querySelector(`.step-content[data-step="${step}"]`).classList.add('active');
+                
+                // Update current step
+                currentStep = step;
+                
+                // Update progress bar
+                const progress = ((step - 1) / (totalSteps - 1)) * 100;
+                document.getElementById('progress-bar').style.width = `${progress}%`;
+                document.getElementById('step-indicator').textContent = `Step ${step}/${totalSteps}`;
+                
+                // Show/hide prev button
+                document.getElementById('prevStepBtn').style.display = step > 1 ? 'block' : 'none';
+                
+                // Change next button text on last step
+                if (step === totalSteps) {
+                    document.getElementById('nextStepBtn').style.display = 'none';
+                    updatePreview();
+                } else {
+                    document.getElementById('nextStepBtn').style.display = 'block';
+                }
+            }
+            
+            function validateStep(step) {
+                // Simple validation can be expanded as needed
+                if (step === 1) {
+                    if (!document.getElementById('invoiceDate').value) {
+                        alert('Please enter Invoice Date');
+                        return false;
+                    }
+                    if (!document.getElementById('exporter').value) {
+                        alert('Please enter Exporter details');
+                        return false;
+                    }
+                    if (!document.getElementById('buyer').value) {
+                        alert('Please enter Buyer details');
+                        return false;
+                    }
+                    return true;
+                } else if (step === 3) {
+                    const productEntries = document.querySelectorAll('.product-entry');
+                    let isValid = true;
+                    
+                    productEntries.forEach(entry => {
+                        const description = entry.querySelector('.product-description').value;
+                        const quantity = entry.querySelector('.product-quantity').value;
+                        const rate = entry.querySelector('.product-rate').value;
+                        
+                        if (!description || !quantity || !rate) {
+                            isValid = false;
+                        }
+                    });
+                    
+                    if (!isValid) {
+                        alert('Please fill in all product details');
+                        return false;
+                    }
+                    
+                    return true;
+                }
+                return true;
+            }
+            
+            // Generate PDF
+            document.getElementById('generatePdfBtn').addEventListener('click', function() {
+                const element = document.getElementById('pdf-content');
+                const options = {
+                    margin: 10,
+                    filename: `commercial_cum_packing_list_${document.getElementById('invoiceNumber').value}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+                
+                html2pdf().set(options).from(element).save().then(() => {
+                    // Save the invoice number after successful PDF generation
+                    const currentInvoiceNum = document.getElementById('invoiceNumber').value;
+                    const numericPart = currentInvoiceNum.replace('INV-', '');
+                    localStorage.setItem('lastInvoiceNumber', parseInt(numericPart));
+                    
+                    alert('PDF generated successfully!');
+                });
+            });
+            
+            // Update preview with form data
+            function updatePreview() {
+                document.getElementById('preview-exporter').textContent = document.getElementById('exporter').value;
+                document.getElementById('preview-invoiceNumber').textContent = document.getElementById('invoiceNumber').value;
+                document.getElementById('preview-invoiceDate').textContent = formatDate(document.getElementById('invoiceDate').value);
+                document.getElementById('preview-buyer').textContent = document.getElementById('buyer').value;
+                document.getElementById('preview-buyerReference').textContent = document.getElementById('buyerReference').value;
+                document.getElementById('preview-notifyParty').textContent = document.getElementById('notifyParty').value;
+                document.getElementById('preview-containerNumber').textContent = document.getElementById('containerNumber').value;
+                document.getElementById('preview-lineSealNo').textContent = document.getElementById('lineSealNo').value;
+                document.getElementById('preview-rfidSealNo').textContent = document.getElementById('rfidSealNo').value;
+                document.getElementById('preview-preCarrierBy').textContent = document.getElementById('preCarrierBy').value;
+                document.getElementById('preview-placeOfReceipt').textContent = document.getElementById('placeOfReceipt').value;
+                document.getElementById('preview-carriageBy').textContent = document.getElementById('carriageBy').value;
+                document.getElementById('preview-portOfLoading').textContent = document.getElementById('portOfLoading').value;
+                document.getElementById('preview-portOfDischarge').textContent = document.getElementById('portOfDischarge').value;
+                document.getElementById('preview-finalDestination').textContent = document.getElementById('finalDestination').value;
+                document.getElementById('preview-countryOfFinalDestination').textContent = document.getElementById('countryOfFinalDestination').value;
+                document.getElementById('preview-grandTotal').textContent = document.getElementById('grandTotal').value;
+                document.getElementById('preview-amountInWords').textContent = document.getElementById('amountInWords').value;
+                document.getElementById('preview-dateOfRateCount').textContent = formatDate(document.getElementById('dateOfRateCount').value);
+                document.getElementById('preview-rateCount').textContent = document.getElementById('rateCount').value;
+                document.getElementById('preview-equivalentInr').textContent = document.getElementById('equivalentInr').value;
+                document.getElementById('preview-marksAndNos').textContent = document.getElementById('marksAndNos').value;
+                document.getElementById('preview-length').textContent = document.getElementById('length').value;
+                document.getElementById('preview-width').textContent = document.getElementById('width').value;
+                document.getElementById('preview-height').textContent = document.getElementById('height').value;
+                document.getElementById('preview-totalPackages').textContent = document.getElementById('totalPackages').value;
+                document.getElementById('preview-notes').textContent = document.getElementById('notes').value;
+                
+                // Banking details
+                document.getElementById('preview-accountName').textContent = document.getElementById('accountName').value;
+                document.getElementById('preview-accountNumber').textContent = document.getElementById('accountNumber').value;
+                document.getElementById('preview-bankingAddress').textContent = document.getElementById('bankingAddress').value;
+                document.getElementById('preview-ifscCode').textContent = document.getElementById('ifscCode').value;
+                document.getElementById('preview-swiftCode').textContent = document.getElementById('swiftCode').value;
+                
+                // Update products table
+                const productsTable = document.getElementById('preview-products');
+                productsTable.innerHTML = '';
+                
+                const productEntries = document.querySelectorAll('.product-entry');
+                productEntries.forEach(entry => {
+                    const description = entry.querySelector('.product-description').value;
+                    const quantity = entry.querySelector('.product-quantity').value;
+                    const rate = entry.querySelector('.product-rate').value;
+                    const total = entry.querySelector('.product-total').value;
+                    
+                    if (description || quantity || rate) {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${description}</td>
+                            <td>${quantity}</td>
+                            <td>${rate}</td>
+                            <td>${total}</td>
+                        `;
+                        productsTable.appendChild(row);
+                    }
+                });
+            }
+            
+            // Helper function to format date
+            function formatDate(dateString) {
+                if (!dateString) return '';
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            }
+        });
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
